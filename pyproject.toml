@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "latencyscope"
-version = "0.1.0"
+version = "0.1.1"
 description = "HFT-grade latency profiler. eBPF-powered, nanosecond-accurate runtime tracing for trading infrastructure."
 readme = "README.md"
 license = "MIT"
@@ -45,7 +45,6 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "bcc>=0.28.0",
     "rich>=13.0.0",
     "click>=8.1.0",
     "hdrhistogram>=0.10.0",

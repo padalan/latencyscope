@@ -30,11 +30,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-bpfcc || true
       - name: Install dependencies
         run: |
           pip install -e ".[dev]"
-          # Mock BCC for type checking (not available in GitHub runners)
-          pip install types-mock
       - name: MyPy
         run: mypy src/latencyscope || true  # Allow failures for now
 

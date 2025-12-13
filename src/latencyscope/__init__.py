@@ -7,7 +7,7 @@ eBPF-powered, nanosecond-accurate runtime tracing for trading infrastructure.
 from latencyscope.cli import main
 from latencyscope.profiler import LatencyProfiler
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Nikhil Padala"
 __email__ = "nikhil@nikhilpadala.com"
 
