@@ -66,10 +66,10 @@ All eBPF programs are:
 
 ## Best Practices for Users
 
-1. **Run on trusted systems only** — eBPF has kernel access
-2. **Use capabilities, not root** — Minimize privilege surface
-3. **Verify binary checksums** — Ensure authentic binaries
-4. **Keep updated** — Apply security patches promptly
+1. **Run on trusted systems only**  -  eBPF has kernel access
+2. **Use capabilities, not root**  -  Minimize privilege surface
+3. **Verify binary checksums**  -  Ensure authentic binaries
+4. **Keep updated**  -  Apply security patches promptly
 
 ## Scope
 

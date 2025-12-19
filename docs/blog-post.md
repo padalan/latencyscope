@@ -17,13 +17,13 @@ image: "/images/blog/latencyscope-hero.png"
 
 It was 2:47 AM on a Thursday in 2019. I was sitting in Akuna Capital's Chicago office, staring at a production metrics dashboard that made no sense.
 
-Our market-making system—the one I'd spent eighteen months optimizing to sub-380 nanosecond tick-to-trade latency—was hemorrhaging money. Not in obvious ways. The P&L wasn't red. The fills looked normal. But our edge was eroding, basis point by basis point, in ways that our monitoring couldn't explain.
+Our market-making system - the one I'd spent eighteen months optimizing to sub-380 nanosecond tick-to-trade latency - was hemorrhaging money. Not in obvious ways. The P&L wasn't red. The fills looked normal. But our edge was eroding, basis point by basis point, in ways that our monitoring couldn't explain.
 
 The culprit? A **context switch** that happened exactly once every 47 seconds.
 
 Not every second. Not randomly. Every 47 seconds, like clockwork, something preempted our trading thread for approximately 12 microseconds. On a system where we measured competitiveness in hundreds of nanoseconds, 12 microseconds was an eternity. It meant we were late to 0.02% of quotes. But in HFT, 0.02% of quotes over months compounds into millions.
 
-I spent three weeks hunting this bug. `strace` was useless—its overhead was 50x higher than the latency we were measuring. `perf` gave us statistical profiles, not deterministic answers. We tried custom kernel modules. We tried hardware counters. We even tried instrumenting the kernel scheduler source code.
+I spent three weeks hunting this bug. `strace` was useless - its overhead was 50x higher than the latency we were measuring. `perf` gave us statistical profiles, not deterministic answers. We tried custom kernel modules. We tried hardware counters. We even tried instrumenting the kernel scheduler source code.
 
 Finally, we found it: a **kworker thread** doing periodic writeback to disk, stealing our CPU for exactly the time it took to flush a page. The kernel's completely innocent attempt to maintain filesystem consistency was costing us $2.4 million per year in lost alpha.
 
@@ -67,12 +67,12 @@ For a one-off exploration, bpftrace is perfect. For continuous production monito
 
 The ideal HFT profiler would:
 
-1. **< 500 ns overhead per event** — Low enough to not distort P99.99 measurements
-2. **Deterministic capture** — Every event, not statistical sampling
-3. **Nanosecond timestamps** — TSC-based, not gettimeofday
-4. **Easy installation** — `pip install` and done
-5. **Production-safe** — No kernel panics, no surprises
-6. **Actionable outputs** — Not just data, but diagnosis
+1. **< 500 ns overhead per event**  -  Low enough to not distort P99.99 measurements
+2. **Deterministic capture**  -  Every event, not statistical sampling
+3. **Nanosecond timestamps**  -  TSC-based, not gettimeofday
+4. **Easy installation**  -  `pip install` and done
+5. **Production-safe**  -  No kernel panics, no surprises
+6. **Actionable outputs**  -  Not just data, but diagnosis
 
 That's LatencyScope.
 
@@ -98,7 +98,7 @@ Key specifications:
 | Timestamp resolution | 1 ns | 1 µs | 1 µs |
 | Drop-free capture | Yes | No | No |
 | Installation | `pip install` | apt/yum | apt/yum |
-| Production safe | Yes | ⚠️ | Yes |
+| Production safe | Yes | Partial | Yes |
 
 ---
 
@@ -151,9 +151,9 @@ Reality is messier. Kernel workers, interrupt handlers, and even the scheduler's
 
 ```python
 # The eBPF program traces these kernel events:
-# - sched:sched_switch — Context switches on monitored cores
-# - sched:sched_migrate_task — Involuntary core migrations
-# - sched:sched_wakeup — Runqueue latency measurement
+# - sched:sched_switch  -  Context switches on monitored cores
+# - sched:sched_migrate_task  -  Involuntary core migrations
+# - sched:sched_wakeup  -  Runqueue latency measurement
 ```
 
 **What it catches**:
@@ -161,7 +161,7 @@ Reality is messier. Kernel workers, interrupt handlers, and even the scheduler's
 - Involuntary core migrations (scheduler moving tasks between CPUs)
 - Runqueue latency (delay between wake-up and actually running)
 
-**Real-world example**: We once found a trading system where the kernel's CPU load balancer was migrating threads to "help" with load distribution—even though we'd explicitly pinned them. The migration itself took 3 microseconds each time.
+**Real-world example**: We once found a trading system where the kernel's CPU load balancer was migrating threads to "help" with load distribution - even though we'd explicitly pinned them. The migration itself took 3 microseconds each time.
 
 ### Module 2: IRQ Storm Detector
 
@@ -171,8 +171,8 @@ Even on isolated cores, interrupts can steal CPU cycles. Network card interrupts
 
 ```python
 # Traces:
-# - irq:irq_handler_entry/exit — Hard IRQ duration
-# - irq:softirq_entry/exit — SoftIRQ duration
+# - irq:irq_handler_entry/exit  -  Hard IRQ duration
+# - irq:softirq_entry/exit  -  SoftIRQ duration
 ```
 
 **What it catches**:
@@ -190,8 +190,8 @@ In HFT, all memory should be pre-faulted, locked, and hot in cache. Any page fau
 
 ```python
 # Traces:
-# - exceptions:page_fault_user — Minor/major page faults
-# - tlb:tlb_flush — TLB shootdown IPIs
+# - exceptions:page_fault_user  -  Minor/major page faults
+# - tlb:tlb_flush  -  TLB shootdown IPIs
 ```
 
 **What it catches**:
@@ -209,8 +209,8 @@ A well-designed HFT system should never block. No mutexes, no I/O waits, no slee
 
 ```python
 # Traces:
-# - syscalls:sys_*_futex — Futex wait/wake timing
-# - syscalls:sys_*_nanosleep — Sleep detection
+# - syscalls:sys_*_futex  -  Futex wait/wake timing
+# - syscalls:sys_*_nanosleep  -  Sleep detection
 ```
 
 **What it catches**:
@@ -228,9 +228,9 @@ Not everyone uses kernel bypass (DPDK, AF_XDP). For those using the kernel stack
 
 ```python
 # Traces:
-# - napi:napi_poll — NAPI poll entry/exit
-# - net:netif_receive_skb — Packet arrival
-# - skb:kfree_skb — Queue drops
+# - napi:napi_poll  -  NAPI poll entry/exit
+# - net:netif_receive_skb  -  Packet arrival
+# - skb:kfree_skb  -  Queue drops
 ```
 
 **What it catches**:
@@ -242,7 +242,7 @@ Not everyone uses kernel bypass (DPDK, AF_XDP). For those using the kernel stack
 
 ## The Alpha Flamegraph: Width = Dollars Lost
 
-Traditional flamegraphs show time. But time without context is just a number.
+Traditional flamegraphs show time. But time without context is meaningless.
 
 LatencyScope introduces the **Alpha Flamegraph**: a flamegraph where width is scaled by dollar impact, not just duration.
 
@@ -269,11 +269,11 @@ The key insight is that the **eBPF programs run in the kernel** regardless of us
 
 For a *profiler* (not the trading system itself), Python is ideal:
 
-1. **Same ecosystem as latency-audit** — Familiar to the community
-2. **Easy installation** — `pip install` vs. compiling Rust + LLVM
-3. **Accessible for contributions** — More developers can contribute
-4. **BCC is production-grade** — Used by Facebook, Netflix, Google
-5. **HDRHistogram available** — P99.999 accuracy in Python
+1. **Same ecosystem as latency-audit**  -  Familiar to the community
+2. **Easy installation**  -  `pip install` vs. compiling Rust + LLVM
+3. **Accessible for contributions**  -  More developers can contribute
+4. **BCC is production-grade**  -  Used by Facebook, Netflix, Google
+5. **HDRHistogram available**  -  P99.999 accuracy in Python
 
 The eBPF programs embedded in LatencyScope are compiled and run in the kernel at native speed. Python just collects and displays the results.
 
@@ -297,7 +297,7 @@ sudo latencyscope --cpus 4,5,6,7 --duration 300
 ### Example Output
 
 ```
-LatencyScope v0.1.0 — HFT Latency Profiler
+LatencyScope v0.1.0  -  HFT Latency Profiler
 
 Target: PID 12345 (trading_engine)
 Duration: 60.0s | Cores: 4,5,6,7 (isolated)
@@ -392,7 +392,7 @@ Tick-to-trade latency:
   P99.99:  3.2 µs    ← 15x improvement
 ```
 
-The P99.99 improved from 47 µs to 3.2 µs—a 15x reduction in tail latency. Most importantly, LatencyScope told me *exactly* what to fix and verified the fixes worked.
+The P99.99 improved from 47 µs to 3.2 µs - a 15x reduction in tail latency. Most importantly, LatencyScope told me *exactly* what to fix and verified the fixes worked.
 
 ---
 

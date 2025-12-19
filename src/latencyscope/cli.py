@@ -17,7 +17,7 @@ from latencyscope.utils import check_prerequisites, parse_cpu_list
 console = Console()
 
 
-@click.command()
+@click.group(invoke_without_command=True)
 @click.option(
     "--duration",
     "-d",
@@ -93,7 +93,9 @@ console = Console()
     help="Enable verbose output",
 )
 @click.version_option(version=__version__, prog_name="latencyscope")
+@click.pass_context
 def main(
+    ctx: click.Context,
     duration: int,
     pid: int | None,
     cpus: str | None,
@@ -116,10 +118,41 @@ def main(
 
         latencyscope --duration 10
 
-        latencyscope --pid 12345 --module isolation
-
-        latencyscope --cpus 4,5,6,7 --json
+        latencyscope monitor
     """
+    if ctx.invoked_subcommand is None:
+        run_profiler(duration, pid, cpus, module, interface, output, output_format, json, notional, bps_per_us, verbose)
+
+@main.command()
+def monitor() -> None:
+    """Launch the Real-time Jitter Monitor (TUI)."""
+    # Import locally to avoid heavy dependencies if just running CLI help
+    from latencyscope.tui import LatencyScopeTUI
+    
+    console.print("[bold cyan]LatencyScope Monitor[/bold cyan] starting...")
+    tui = LatencyScopeTUI()
+    try:
+        tui.run()
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+
+
+def run_profiler(
+    duration: int,
+    pid: int | None,
+    cpus: str | None,
+    module: tuple[str, ...],
+    interface: str | None,
+    output: str | None,
+    output_format: str,
+    json: bool,
+    notional: float | None,
+    bps_per_us: float,
+    verbose: bool,
+) -> None:
+    """Legacy profiler runner."""
     # Handle --json shorthand
     if json:
         output_format = "json"
@@ -207,10 +240,10 @@ def main(
 class nullcontext:
     """Null context manager for Python 3.10 compatibility."""
 
-    def __enter__(self):
+    def __enter__(self) -> "nullcontext":
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: object) -> None:
         pass
 
 

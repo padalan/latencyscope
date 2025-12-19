@@ -6,6 +6,7 @@ Detects blocking operations in latency-critical hot paths.
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass
 
 from hdrhistogram import HdrHistogram
@@ -161,9 +162,11 @@ class SyscallContention:
         self._bpf = BPF(text=BPF_PROGRAM)
 
         if self.pid:
+            assert self._bpf
             pid_filter = self._bpf["pid_filter"]
             pid_filter[0] = self.pid
 
+        assert self._bpf
         self._bpf["events"].open_perf_buffer(self._handle_event)
 
     def stop(self) -> None:
@@ -177,7 +180,7 @@ class SyscallContention:
         if self._bpf:
             self._bpf.perf_buffer_poll(timeout=100)
 
-    def _handle_event(self, cpu: int, data: bytes, size: int) -> None:
+    def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Handle an event from the perf buffer."""
         import ctypes
 
@@ -213,6 +216,6 @@ class SyscallContention:
             futex_p50_ns=int(self._histogram.get_value_at_percentile(50)),
             futex_p99_ns=int(self._histogram.get_value_at_percentile(99)),
             sleep_event_count=self._sleep_count,
-            blocking_io_count=0,  # TODO: Implement
+            blocking_io_count=0,  # Future: Implement
             violations=violations,
         )

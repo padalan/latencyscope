@@ -6,7 +6,7 @@ on CPU cores that should be isolated for trading threads.
 """
 
 from __future__ import annotations
-
+from typing import Any
 from dataclasses import dataclass, field
 
 from hdrhistogram import HdrHistogram
@@ -125,7 +125,7 @@ class IsolationResults:
     runqueue_p99_99_ns: int = 0
     runqueue_p99_999_ns: int = 0
     runqueue_max_ns: int = 0
-    worst_events: list[dict] = field(default_factory=list)
+    worst_events: list[dict[str, Any]] = field(default_factory=list)
     violations: bool = False
 
 
@@ -150,8 +150,8 @@ class IsolationVerifier:
         self._bpf = None
         self._histogram = HdrHistogram(1, 1_000_000_000, 3)  # 1ns to 1s
         self._switch_counts: dict[int, int] = {}
-        self._migrations: list[dict] = []
-        self._worst_events: list[dict] = []
+        self._migrations: list[dict[str, Any]] = []
+        self._worst_events: list[dict[str, Any]] = []
 
     def start(self) -> None:
         """Start the eBPF program."""
@@ -163,6 +163,7 @@ class IsolationVerifier:
         self._bpf = BPF(text=BPF_PROGRAM)
 
         # Set CPU filter
+        assert self._bpf
         cpu_filter = self._bpf["cpu_filter"]
         if self.cpus:
             for cpu in self.cpus:
@@ -176,10 +177,12 @@ class IsolationVerifier:
 
         # Set PID filter
         if self.pid:
+            assert self._bpf
             pid_filter = self._bpf["pid_filter"]
             pid_filter[0] = self.pid
 
         # Attach perf buffer
+        assert self._bpf
         self._bpf["events"].open_perf_buffer(self._handle_event)
 
     def stop(self) -> None:
@@ -193,7 +196,7 @@ class IsolationVerifier:
         if self._bpf:
             self._bpf.perf_buffer_poll(timeout=100)
 
-    def _handle_event(self, cpu: int, data: bytes, size: int) -> None:
+    def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Handle an event from the perf buffer."""
         import ctypes
 
@@ -241,7 +244,7 @@ class IsolationVerifier:
                 }
             )
 
-    def _update_worst_events(self, event: dict) -> None:
+    def _update_worst_events(self, event: dict[str, Any]) -> None:
         """Update list of worst events."""
         self._worst_events.append(event)
         self._worst_events.sort(key=lambda e: e["runqueue_latency_ns"], reverse=True)

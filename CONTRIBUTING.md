@@ -89,10 +89,10 @@ test: add integration tests for IRQ module
 
 When modifying eBPF programs (embedded in Python modules):
 
-1. **Keep probes minimal** — Every instruction adds overhead
-2. **Use ring buffers** — Perf buffers work, but ring buffers are more efficient
-3. **Test on multiple kernels** — BPF verifier differs between versions
-4. **Document tracepoint assumptions** — Tracepoint formats can change
+1. **Keep probes minimal**  -  Every instruction adds overhead
+2. **Use ring buffers**  -  Perf buffers work, but ring buffers are more efficient
+3. **Test on multiple kernels**  -  BPF verifier differs between versions
+4. **Document tracepoint assumptions**  -  Tracepoint formats can change
 
 ## Adding a New Module
 

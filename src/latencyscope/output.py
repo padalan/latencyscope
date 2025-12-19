@@ -5,6 +5,7 @@ LatencyScope Output Formatting.
 from __future__ import annotations
 
 import json
+from typing import Any
 
 from rich.console import Console
 from rich.panel import Panel
@@ -37,7 +38,7 @@ class OutputFormatter:
 
     def _format_json(self, results: ProfilingResults) -> str:
         """Format as JSON."""
-        data = {
+        data: dict[str, Any] = {
             "duration_seconds": results.duration_seconds,
             "has_violations": results.has_violations,
             "has_warnings": results.has_warnings,

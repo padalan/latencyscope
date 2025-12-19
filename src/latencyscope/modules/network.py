@@ -6,6 +6,7 @@ Profiles kernel network stack latency for non-bypass setups.
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass
 
 from hdrhistogram import HdrHistogram
@@ -124,6 +125,7 @@ class NetworkAnalyzer:
             raise RuntimeError("BCC not installed. Run: sudo apt install python3-bpfcc") from e
 
         self._bpf = BPF(text=BPF_PROGRAM)
+        assert self._bpf
         self._bpf["events"].open_perf_buffer(self._handle_event)
 
     def stop(self) -> None:
@@ -137,7 +139,7 @@ class NetworkAnalyzer:
         if self._bpf:
             self._bpf.perf_buffer_poll(timeout=100)
 
-    def _handle_event(self, cpu: int, data: bytes, size: int) -> None:
+    def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Handle an event from the perf buffer."""
         import ctypes
 
@@ -173,7 +175,7 @@ class NetworkAnalyzer:
             napi_p99_ns=int(self._napi_histogram.get_value_at_percentile(99)),
             napi_max_ns=int(self._napi_histogram.get_max_value()),
             skb_receive_count=self._skb_count,
-            skb_p50_ns=0,  # TODO: Track skb latency
+            skb_p50_ns=0,  # Future: Track skb latency
             skb_p99_ns=0,
             xmit_count=self._xmit_count,
             queue_drop_count=self._drop_count,

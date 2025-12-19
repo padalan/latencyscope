@@ -1,13 +1,13 @@
 # LatencyScope™
 
-> **The profiler that sees what `strace` can't — nanosecond-accurate, eBPF-powered runtime tracing.**
+> **The profiler that sees what `strace` can't  -  nanosecond-accurate, eBPF-powered runtime tracing.**
 
 [![PyPI](https://img.shields.io/pypi/v/latencyscope.svg)](https://pypi.org/project/latencyscope/)
 [![Python](https://img.shields.io/pypi/pyversions/latencyscope.svg)](https://pypi.org/project/latencyscope/)
 [![CI](https://github.com/padalan/latencyscope/actions/workflows/ci.yml/badge.svg)](https://github.com/padalan/latencyscope/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**LatencyScope** is an HFT-grade latency profiling tool that identifies sub-microsecond performance bottlenecks using eBPF kernel tracing. Built by [Nikhil Padala](https://nikhilpadala.com) — the tool I wish existed when debugging $2.4M latency leaks at Akuna.
+**LatencyScope** is an HFT-grade latency profiling tool that identifies sub-microsecond performance bottlenecks using eBPF kernel tracing. Built by [Nikhil Padala](https://nikhilpadala.com)  -  the tool I wish existed when debugging $2.4M latency leaks at Akuna.
 
 From the creator of [latency-audit](https://github.com/padalan/latency-audit).
 
@@ -90,10 +90,10 @@ sudo latencyscope --json --output results.json
 
 | Tool | Overhead | Resolution | HFT-Ready? |
 |------|----------|------------|------------|
-| `strace` | 50,000+ ns | microseconds | ❌ |
-| `perf trace` | 5,000+ ns | microseconds | ❌ |
-| `bpftrace` | 1,000+ ns | microseconds | ⚠️ |
-| **LatencyScope** | **< 500 ns** | **nanoseconds** | ✅ |
+| `strace` | 50,000+ ns | microseconds | No |
+| `perf trace` | 5,000+ ns | microseconds | No |
+| `bpftrace` | 1,000+ ns | microseconds | Partial |
+| **LatencyScope** | **< 500 ns** | **nanoseconds** | Yes |
 
 Traditional profilers inject noise that masks the jitter you're hunting. LatencyScope uses eBPF tracepoints with per-CPU ring buffers for minimal overhead.
 
@@ -114,7 +114,7 @@ Traditional profilers inject noise that masks the jitter you're hunting. Latency
 ## Example Output
 
 ```
-LatencyScope v0.1.0 — HFT Latency Profiler
+LatencyScope v0.1.0  -  HFT Latency Profiler
 
 Target: PID 12345 (trading_engine)
 Duration: 10.0s | Cores: 4,5,6,7 (isolated)
@@ -179,9 +179,9 @@ sudo latencyscope --module isolation --cpus 4,5,6,7
 ```
 
 Traces:
-- `sched:sched_switch` — Context switches on monitored cores
-- `sched:sched_migrate_task` — Involuntary core migrations
-- `sched:sched_wakeup` — Runqueue latency (ttwu → switch)
+- `sched:sched_switch`  -  Context switches on monitored cores
+- `sched:sched_migrate_task`  -  Involuntary core migrations
+- `sched:sched_wakeup`  -  Runqueue latency (ttwu → switch)
 
 ### IRQ Storm Detector
 
@@ -190,8 +190,8 @@ sudo latencyscope --module irq --cpus 4,5,6,7
 ```
 
 Traces:
-- `irq:irq_handler_entry/exit` — Hard IRQ duration
-- `irq:softirq_entry/exit` — SoftIRQ duration
+- `irq:irq_handler_entry/exit`  -  Hard IRQ duration
+- `irq:softirq_entry/exit`  -  SoftIRQ duration
 
 ### Memory Stall Profiler
 
@@ -200,8 +200,8 @@ sudo latencyscope --module memory --pid $(pgrep app)
 ```
 
 Traces:
-- `exceptions:page_fault_user` — Minor/major page faults
-- `tlb:tlb_flush` — TLB shootdown IPIs
+- `exceptions:page_fault_user`  -  Minor/major page faults
+- `tlb:tlb_flush`  -  TLB shootdown IPIs
 
 ### Lock & Syscall Contention
 
@@ -210,8 +210,8 @@ sudo latencyscope --module syscall --pid $(pgrep app)
 ```
 
 Traces:
-- `syscalls:sys_*_futex` — Futex wait/wake timing
-- `syscalls:sys_*_nanosleep` — Sleep detection (HFT red flag)
+- `syscalls:sys_*_futex`  -  Futex wait/wake timing
+- `syscalls:sys_*_nanosleep`  -  Sleep detection (HFT red flag)
 
 ### Network Path Analyzer
 
@@ -220,8 +220,8 @@ sudo latencyscope --module network --interface eth0
 ```
 
 Traces:
-- `napi:napi_poll` — NAPI poll duration
-- `net:netif_receive_skb` — Packet arrival timing
+- `napi:napi_poll`  -  NAPI poll duration
+- `net:netif_receive_skb`  -  Packet arrival timing
 
 ---
 
@@ -303,6 +303,6 @@ Built with obsessive attention to nanoseconds.
 
 ## See Also
 
-- [latency-audit](https://github.com/padalan/latency-audit) — Static configuration auditor (same author)
-- [BCC](https://github.com/iovisor/bcc) — BPF Compiler Collection
+- [latency-audit](https://github.com/padalan/latency-audit) - Static configuration auditor (same author)
+- [BCC](https://github.com/iovisor/bcc)  -  BPF Compiler Collection
 - [Brendan Gregg's BPF Performance Tools](https://www.brendangregg.com/bpf-performance-tools-book.html)

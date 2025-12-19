@@ -6,6 +6,7 @@ Detects page faults, TLB shootdowns, and NUMA remote access.
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass
 
 from hdrhistogram import HdrHistogram
@@ -110,9 +111,11 @@ class MemoryProfiler:
 
         # Set PID filter
         if self.pid:
+            assert self._bpf
             pid_filter = self._bpf["pid_filter"]
             pid_filter[0] = self.pid
 
+        assert self._bpf
         self._bpf["events"].open_perf_buffer(self._handle_event)
 
     def stop(self) -> None:
@@ -126,7 +129,7 @@ class MemoryProfiler:
         if self._bpf:
             self._bpf.perf_buffer_poll(timeout=100)
 
-    def _handle_event(self, cpu: int, data: bytes, size: int) -> None:
+    def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Handle an event from the perf buffer."""
         import ctypes
 
@@ -157,7 +160,7 @@ class MemoryProfiler:
             major_fault_count=self._major_faults,
             minor_fault_count=self._minor_faults,
             tlb_shootdown_count=self._tlb_shootdowns,
-            numa_remote_count=0,  # TODO: Implement via PMC
+            numa_remote_count=0,  # Future: Implement via PMC
             fault_p50_ns=int(self._histogram.get_value_at_percentile(50)),
             fault_p99_ns=int(self._histogram.get_value_at_percentile(99)),
             fault_max_ns=int(self._histogram.get_max_value()),

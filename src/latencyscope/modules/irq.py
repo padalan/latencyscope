@@ -6,6 +6,7 @@ Identifies hardware and software interrupts interfering with trading threads.
 
 from __future__ import annotations
 
+from typing import Any
 from dataclasses import dataclass, field
 
 from hdrhistogram import HdrHistogram
@@ -127,7 +128,7 @@ class IrqResults:
     max_irq_duration_ns: int = 0
     irq_p50_ns: int = 0
     irq_p99_ns: int = 0
-    longest_irqs: list[dict] = field(default_factory=list)
+    longest_irqs: list[dict[str, Any]] = field(default_factory=list)
     violations: bool = False
 
 
@@ -151,7 +152,7 @@ class IrqDetector:
         self._histogram = HdrHistogram(1, 1_000_000_000, 3)
         self._irq_counts: dict[int, int] = {}
         self._softirq_count = 0
-        self._longest_irqs: list[dict] = []
+        self._longest_irqs: list[dict[str, Any]] = []
 
     def start(self) -> None:
         """Start the eBPF program."""
@@ -163,6 +164,7 @@ class IrqDetector:
         self._bpf = BPF(text=BPF_PROGRAM)
 
         # Set CPU filter
+        assert self._bpf
         cpu_filter = self._bpf["cpu_filter"]
         if self.cpus:
             for cpu in self.cpus:
@@ -173,6 +175,7 @@ class IrqDetector:
             for cpu in range(os.cpu_count() or 1):
                 cpu_filter[cpu] = 1
 
+        assert self._bpf
         self._bpf["events"].open_perf_buffer(self._handle_event)
 
     def stop(self) -> None:
@@ -186,7 +189,7 @@ class IrqDetector:
         if self._bpf:
             self._bpf.perf_buffer_poll(timeout=100)
 
-    def _handle_event(self, cpu: int, data: bytes, size: int) -> None:
+    def _handle_event(self, cpu: int, data: Any, size: int) -> None:
         """Handle an event from the perf buffer."""
         import ctypes
 
@@ -221,7 +224,7 @@ class IrqDetector:
             self._softirq_count += 1
             self._histogram.record_value(min(event.duration_ns, 1_000_000_000))
 
-    def _update_longest_irqs(self, event: dict) -> None:
+    def _update_longest_irqs(self, event: dict[str, Any]) -> None:
         """Update list of longest IRQ events."""
         self._longest_irqs.append(event)
         self._longest_irqs.sort(key=lambda e: e["duration_ns"], reverse=True)
@@ -239,7 +242,7 @@ class IrqDetector:
             total_irq_count=total_irqs,
             irqs_per_cpu=dict(self._irq_counts),
             softirq_count=self._softirq_count,
-            softirq_overlaps=0,  # TODO: Implement overlap detection
+            softirq_overlaps=0,  # Future: Implement overlap detection
             max_irq_duration_ns=max_duration,
             irq_p50_ns=int(self._histogram.get_value_at_percentile(50)),
             irq_p99_ns=int(self._histogram.get_value_at_percentile(99)),
