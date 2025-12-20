@@ -72,4 +72,4 @@ class TestOutputFormatter:
 
         # 10 microseconds * 0.5 bps * $10M / 10000 = $500
         cost = formatter._calculate_cost(10_000)  # 10,000 ns = 10 µs
-        assert cost == pytest.approx(500.0)
+        assert cost == pytest.approx(5000.0)

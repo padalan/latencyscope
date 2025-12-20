@@ -6,8 +6,8 @@ Profiles kernel network stack latency for non-bypass setups.
 
 from __future__ import annotations
 
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 from hdrhistogram import HdrHistogram
 

@@ -121,14 +121,27 @@ def main(
         latencyscope monitor
     """
     if ctx.invoked_subcommand is None:
-        run_profiler(duration, pid, cpus, module, interface, output, output_format, json, notional, bps_per_us, verbose)
+        run_profiler(
+            duration,
+            pid,
+            cpus,
+            module,
+            interface,
+            output,
+            output_format,
+            json,
+            notional,
+            bps_per_us,
+            verbose,
+        )
+
 
 @main.command()
 def monitor() -> None:
     """Launch the Real-time Jitter Monitor (TUI)."""
     # Import locally to avoid heavy dependencies if just running CLI help
     from latencyscope.tui import LatencyScopeTUI
-    
+
     console.print("[bold cyan]LatencyScope Monitor[/bold cyan] starting...")
     tui = LatencyScopeTUI()
     try:
@@ -240,7 +253,7 @@ def run_profiler(
 class nullcontext:
     """Null context manager for Python 3.10 compatibility."""
 
-    def __enter__(self) -> "nullcontext":
+    def __enter__(self) -> nullcontext:
         return self
 
     def __exit__(self, *args: object) -> None:

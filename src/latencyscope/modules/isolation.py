@@ -6,8 +6,9 @@ on CPU cores that should be isolated for trading threads.
 """
 
 from __future__ import annotations
-from typing import Any
+
 from dataclasses import dataclass, field
+from typing import Any
 
 from hdrhistogram import HdrHistogram
 

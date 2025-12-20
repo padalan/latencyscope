@@ -6,8 +6,8 @@ Detects blocking operations in latency-critical hot paths.
 
 from __future__ import annotations
 
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 from hdrhistogram import HdrHistogram
 

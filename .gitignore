@@ -68,5 +68,5 @@ Thumbs.db
 # Local development
 .pre-commit-config.yaml.local
 
-# Agent artifacts
+# Agent metadata (local only)
 .agent/

@@ -6,8 +6,8 @@ Detects page faults, TLB shootdowns, and NUMA remote access.
 
 from __future__ import annotations
 
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 from hdrhistogram import HdrHistogram
 

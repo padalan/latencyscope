@@ -2,6 +2,8 @@
 LatencyScope Tests - Utilities
 """
 
+import unittest.mock
+
 from latencyscope.utils import format_nanoseconds, parse_cpu_list
 
 
@@ -21,7 +23,8 @@ class TestParseCpuList:
         assert parse_cpu_list("4-7") == [4, 5, 6, 7]
 
     def test_mixed(self):
-        assert parse_cpu_list("0-2,5,7-9") == [0, 1, 2, 5, 7, 8, 9]
+        with unittest.mock.patch("os.cpu_count", return_value=32):
+            assert parse_cpu_list("0-2,5,7-9") == [0, 1, 2, 5, 7, 8, 9]
 
 
 class TestFormatNanoseconds:
